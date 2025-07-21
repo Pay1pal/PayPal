@@ -13,6 +13,7 @@
       overflow: hidden;
       display: flex;
       flex-direction: column;
+      touch-action: manipulation;
     }
     .top-bar { padding: 15px; text-align: center; font-weight: bold; font-size: 18px; }
     .profile-section { text-align: center; margin-top: 10px; }
@@ -44,9 +45,8 @@
     .actions button { flex: 1; margin: 0 10px; padding: 14px 0; border: none; background: #000; color: #fff; font-size: 16px; border-radius: 30px; font-weight: bold; }
     .keypad { position: fixed; bottom: 0; left: 0; width: 100%; background: #eee; padding: 20px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; transform: translateY(100%); transition: transform 0.4s ease-in-out; z-index: 999; }
     .keypad.show { transform: translateY(0%); }
-    .keypad button { padding: 20px; font-size: 20px; background: white; border: none; border-radius: 10px; font-weight: bold; }
+    .keypad button { padding: 20px; font-size: 20px; background: white; border: none; border-radius: 10px; font-weight: bold; color: black; }
     .keypad button:active { background: #ddd; }
-    body { touch-action: manipulation; }
   </style>
 </head>
 <body>
@@ -93,12 +93,14 @@
   const keypad = document.getElementById("keypad");
   const payButton = document.getElementById("payButton");
   let rawAmount = "";
+  let hideTimeout;
 
   payButton.disabled = true;
   payButton.style.opacity = "0.5";
 
   amountDisplay.addEventListener("click", () => {
     keypad.classList.add("show");
+    resetHideTimeout();
   });
 
   function formatAmount(amount) {
@@ -116,22 +118,32 @@
     }
   }
 
+  function resetHideTimeout() {
+    clearTimeout(hideTimeout);
+    hideTimeout = setTimeout(() => {
+      keypad.classList.remove("show");
+    }, 2000);
+  }
+
   function appendNumber(num) {
     rawAmount += num;
     amountDisplay.textContent = formatAmount(rawAmount);
     updatePayButton();
+    resetHideTimeout();
   }
 
   function clearAmount() {
     rawAmount = "";
     amountDisplay.textContent = "£0.00";
     updatePayButton();
+    resetHideTimeout();
   }
 
   function backspace() {
     rawAmount = rawAmount.slice(0, -1);
     amountDisplay.textContent = formatAmount(rawAmount);
     updatePayButton();
+    resetHideTimeout();
   }
 
   function pay() {
